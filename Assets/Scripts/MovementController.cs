@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
 
-public class Player : MonoBehaviour
+public class MovementController : MonoBehaviour
 {
 
-    [Tooltip("In m/s")][SerializeField] float xSpeed = 10f;
+    [Tooltip("In m/s")] [SerializeField] float xSpeed = 10f;
     [Tooltip("In m/s")] [SerializeField] float ySpeed = 7f;
 
     [Tooltip("In m")] [SerializeField] float xRange = 5f;
-    [Tooltip("In m")] [SerializeField] float yRange = 3f;
+    [Tooltip("In m")] [SerializeField] float yRange = 4.35f;
 
 
     [SerializeField] float pitchPosFactor = -5f;
@@ -20,52 +17,56 @@ public class Player : MonoBehaviour
     [SerializeField] float yawThrowFactor = 10f;
     [SerializeField] float rollThrowFactor = -31f;
 
+    [SerializeField] ParticleSystem LeftBullets = null;
+    [SerializeField] ParticleSystem RightBullets = null;
 
-    [SerializeField] ParticleSystem LeftBullets;
-    [SerializeField] ParticleSystem RightBullets;
+    [SerializeField] AudioClip BulletSound = null;
+    AudioSource audioSource = null;
 
-    bool fired = false;
 
+
+
+    bool isControlsEnable = true;
     float xThrow, xOffset, yThrow, yOffset, xNew, yNew;
-    Vector3 currentPos, finalPos;
+
     void Start()
     {
-        
+        audioSource = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        ProcessFiring();
-        ProcessTranslation();
-        ProcessRotation();
-        
+        if (isControlsEnable)
+        {
+            ProcessFiring();
+            ProcessTranslation();
+            ProcessRotation();
+        }
 
     }
+
+    public void OnPlayerDeath()
+    {
+        isControlsEnable = false;
+    }
+
 
     private void ProcessFiring()
     {
-        float fire = CrossPlatformInputManager.GetAxisRaw("Jump");
-        if (fire > 0f)
+        bool fire = CrossPlatformInputManager.GetButtonDown("Jump");
+        if (fire)
         {
-            fired = false;
-            finalPos = transform.position;
-            var LeftBulletsMain = LeftBullets.main;
-            var RightBulletsMain = RightBullets.main;
-            float initialSpeed = Mathf.Abs((finalPos.sqrMagnitude - currentPos.sqrMagnitude) / Time.deltaTime);
-            print("speed" + initialSpeed);
-            LeftBulletsMain.startSpeed = initialSpeed + 150f;
-            RightBulletsMain.startSpeed = initialSpeed + 150f;
+            audioSource.PlayOneShot(BulletSound);
             LeftBullets.Play();
             RightBullets.Play();
-
         }
-    }
 
+    }
     private void ProcessRotation()
     {
         float yPos = transform.localPosition.y;
-        float pitchDueToPos =  yPos * pitchPosFactor;
+        float pitchDueToPos = yPos * pitchPosFactor;
         float pitchDueToThrow = yThrow * pitchThrowFactor;
 
         float xPos = transform.localPosition.x;
@@ -78,7 +79,7 @@ public class Player : MonoBehaviour
 
     private void ProcessTranslation()
     {
-        
+
 
         xThrow = CrossPlatformInputManager.GetAxis("Horizontal");
         yThrow = CrossPlatformInputManager.GetAxis("Vertical");
@@ -89,10 +90,7 @@ public class Player : MonoBehaviour
         yNew = Mathf.Clamp(transform.localPosition.y + yOffset, -yRange, yRange);
 
         transform.localPosition = new Vector3(xNew, yNew, transform.localPosition.z);
-        if (!fired)
-        {
-            currentPos = transform.position;
-        }
-        
+
+
     }
 }
