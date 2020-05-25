@@ -6,6 +6,7 @@ public class Enemy : MonoBehaviour
     // Start is called before the first frame update
 
     ScoreBoard scoreBoard;
+    int timesHit = 0;
     void Start()
     {
         AddBoxCollider();
@@ -21,12 +22,17 @@ public class Enemy : MonoBehaviour
     private void StartDeathSequence()
     {
         Instantiate(deathFX, transform.position, Quaternion.identity);
+        if (timesHit == 1)
+        {
+            scoreBoard.AddPoints(500);
+        }
+        
         Destroy(gameObject);
-        scoreBoard.AddPoints(500);
     }
 
     private void OnParticleCollision(GameObject other)
     {
         StartDeathSequence();
+        timesHit++;
     }
 }
