@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
 
-public class MovementController : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
 
     [Tooltip("In m/s")] [SerializeField] float xSpeed = 10f;
@@ -54,12 +54,14 @@ public class MovementController : MonoBehaviour
 
     private void ProcessFiring()
     {
-        bool fire = CrossPlatformInputManager.GetButtonDown("Jump");
-        if (fire)
+        
+        if (CrossPlatformInputManager.GetButtonDown("Fire"))
         {
+
             audioSource.PlayOneShot(BulletSound);
             LeftBullets.Play();
             RightBullets.Play();
+
         }
 
     }
